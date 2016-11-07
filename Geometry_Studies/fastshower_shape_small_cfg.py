@@ -5,6 +5,6 @@ from os.path import splitext, basename
 input_dir = '/home/sauvan/Documents/HEP/Projects/CMS/L1CalorimeterTrigger_Phase2HGCal/Misc/FastShower/output/'
 
 parameters = Parameters()
-parameters.input_files = sorted([(splitext(basename(f))[0], f) for f in glob(input_dir+'*.root')])
+parameters.input_files = sorted([(splitext(basename(f))[0], f) for f in glob(input_dir+'*small*.root')])
 parameters.tree = 'tree'
-parameters.output_file = 'output.root'
+parameters.output_file = 'output_smallcells.root'
