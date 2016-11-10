@@ -7,5 +7,5 @@ input_dir = '/home/sauvan/Documents/HEP/Projects/CMS/L1CalorimeterTrigger_Phase2
 parameters = Parameters()
 parameters.input_files = sorted([(splitext(basename(f))[0], f) for f in glob(input_dir+'*large*.root')])
 parameters.tree = 'tree'
-parameters.log_weights = False
+parameters.log_weights = True
 parameters.output_file = 'output/output_largecells_logweights.root'

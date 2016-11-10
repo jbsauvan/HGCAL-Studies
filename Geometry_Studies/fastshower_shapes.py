@@ -14,10 +14,15 @@ def moments(event, log_weights=False):
                    ], dtype=np.float32).transpose()
 
   xys = cells[:,1:]
+  threshold = 1.e-1 # 100 MeV
   if log_weights:
-    weights = np.log(cells[:,[0]].ravel()) # log energy weights
+    weights = np.log(np.abs(cells[:,[0]].ravel())/threshold) # log energy weights
+    negative_index = weights < 0
+    weights[negative_index] = 0
   else:
-    weights = cells[:,[0]].ravel() # log energy weights
+    weights = cells[:,[0]].ravel() # energy weights
+    zero_index = weights < threshold
+    weights[zero_index] = 0
   # variances followed by covariances
   # xx, yy, uu, vv, xy, xu, xv, yu, yv, uv
   covar_xy = np.cov(xys, rowvar=False, aweights=weights).ravel()[[0,5,10,15,1,2,3,6,7,11]]

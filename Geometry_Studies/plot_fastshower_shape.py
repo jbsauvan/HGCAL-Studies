@@ -66,8 +66,10 @@ if __name__=='__main__':
   (opt, args) = parser.parse_args()
   current_dir = os.getcwd();
   sys.path.append(current_dir)
-  # Remove the extension of the python file before module loading
-  if opt.parameter_file[-3:]=='.py': opt.parameter_file = opt.parameter_file[:-3]
-  parameters = importlib.import_module(opt.parameter_file).parameters
+  # Add config directory to the python path and load configuration
+  config_dir = os.path.dirname(opt.parameter_file)
+  config_module = os.path.splitext(os.path.basename(opt.parameter_file))[0]
+  sys.path.append(current_dir+'/'+config_dir)
+  parameters = importlib.import_module(config_module).parameters
   main(parameters)
 

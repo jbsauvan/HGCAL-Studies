@@ -14,7 +14,7 @@ histo_cfg3.range = range_x
 
 
 parameters = PlotParameters()
-parameters.input_file = './output_largecells.root'
+parameters.input_file = './output/output_largecells.root'
 # hexagon distributions
 parameters.distribution_plots['variance_large_hexagons_x'] = []
 parameters.distribution_plots['variance_large_hexagons_x'].append(copy(histo_cfg1))
