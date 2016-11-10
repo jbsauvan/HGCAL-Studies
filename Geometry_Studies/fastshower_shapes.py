@@ -5,7 +5,7 @@ from rootpy.plotting import Hist
 from root_numpy import fill_hist
 
 
-def moments(event):
+def moments(event, log_weights=False):
   cells = np.array([[energy for energy in event.cell_energy],
                     [x for x in event.cell_x],
                     [y for y in event.cell_y],
@@ -14,13 +14,16 @@ def moments(event):
                    ], dtype=np.float32).transpose()
 
   xys = cells[:,1:]
-  weights = cells[:,[0]].ravel() # log energy weights
+  if log_weights:
+    weights = np.log(cells[:,[0]].ravel()) # log energy weights
+  else:
+    weights = cells[:,[0]].ravel() # log energy weights
   # variances followed by covariances
   # xx, yy, uu, vv, xy, xu, xv, yu, yv, uv
   covar_xy = np.cov(xys, rowvar=False, aweights=weights).ravel()[[0,5,10,15,1,2,3,6,7,11]]
   return covar_xy
 
-def shape_distribution(tree):
+def shape_distribution(tree, log_weights=False):
   moliere = 2.3
   moment_2nd_x = Hist(100, 0., moliere*2., name='var_x')
   moment_2nd_y = Hist(100, 0., moliere*2., name='var_y')
@@ -34,7 +37,7 @@ def shape_distribution(tree):
   moment_2nd_v.SetXTitle('Var(v) [cm^{2}]')
   moment_2nd_xy.SetXTitle('Covar(x,y) [cm^{2}]')
   moment_2nd_uv.SetXTitle('Covar(u,v) [cm^{2}]')
-  covars = np.array([moments(event) for event in tree], np.float32) 
+  covars = np.array([moments(event, log_weights) for event in tree], np.float32) 
   var_x = covars[:,[0]].ravel()
   var_y = covars[:,[1]].ravel()
   covar_xy = covars[:,[4]].ravel()
@@ -78,7 +81,7 @@ def main(parameters):
       cov_rmss.GetXaxis().SetBinLabel(i*2+2, name+' u/v')
       with root_open(input_file_name) as input_file:
         tree = input_file.Get(tree_name)
-        moment_2nd_x, moment_2nd_y, moment_2nd_xy, moment_2nd_u, moment_2nd_v, moment_2nd_uv = shape_distribution(tree)
+        moment_2nd_x, moment_2nd_y, moment_2nd_xy, moment_2nd_u, moment_2nd_v, moment_2nd_uv = shape_distribution(tree, parameters.log_weights)
         print name
         print 'x variance Mu =', moment_2nd_x.GetMean(), '+/-', moment_2nd_x.GetMeanError(), 'RMS =', moment_2nd_x.GetRMS(), '+/-', moment_2nd_x.GetRMSError()
         print 'y variance Mu =', moment_2nd_y.GetMean(), '+/-', moment_2nd_y.GetMeanError(), 'RMS =', moment_2nd_y.GetRMS(), '+/-', moment_2nd_y.GetRMSError()
@@ -145,8 +148,10 @@ if __name__=='__main__':
   (opt, args) = parser.parse_args()
   current_dir = os.getcwd();
   sys.path.append(current_dir)
-  # Remove the extension of the python file before module loading
-  if opt.parameter_file[-3:]=='.py': opt.parameter_file = opt.parameter_file[:-3]
-  parameters = importlib.import_module(opt.parameter_file).parameters
+  # Add config directory to the python path and load configuration
+  config_dir = os.path.dirname(opt.parameter_file)
+  config_module = os.path.splitext(os.path.basename(opt.parameter_file))[0]
+  sys.path.append(current_dir+'/'+config_dir)
+  parameters = importlib.import_module(config_module).parameters
   main(parameters)
 

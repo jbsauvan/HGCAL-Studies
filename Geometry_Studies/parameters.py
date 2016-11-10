@@ -4,6 +4,7 @@ class Parameters:
   def __init__(self):
     self.input_files = []
     self.input_tree = 'tree'
+    self.log_weights = False
     self.output_file = 'output.root'
 
 
